@@ -1,0 +1,34 @@
+jwt :
+  secret : springSecuritySampleSecretKeyMessage
+  token.validation :
+    access : 86400 #하루
+    refresh : 1296000 #15일
+
+#Oracle
+#spring :
+#  datasource :
+#    driver-class-name: oracle.jdbc.driver.OracleDriver
+#    url : jdbc:oracle:thin:@edudb_high?TNS_ADMIN=C:\\Users\\LimJiyoung\\IntelliJ\\Wall3t_edudb
+#    username : jiyoung
+#    password : Douzone12345
+#
+#  jpa :
+#    hibernate.ddl-auto : create #Server 재시작시 테이블 정보 reset
+#    show-sql : true
+#    properties.hibernate.format_sql : true
+#    database: oracle
+
+spring :
+  jpa :
+    show_sql : true
+    hibernate.ddl-auto : create
+    properties:
+      hibernate :
+        dialect : org.hibernate.dialect.MySQL57Dialect
+        dialect.storage_engine : innodb
+  datasource.hikari :
+    jdbc-url : jdbc:h2:mem:testdb;MODE=MYSQL
+    username : sa
+  h2:
+    console:
+      enabled: true
