@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;  ///  pom.xml에 라이브러리 �
 
 import com.example.security.model.RefreshToken;
 import com.example.security.model.Role;
-import com.example.security.model.Token;
+import com.example.security.dto.Token;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;

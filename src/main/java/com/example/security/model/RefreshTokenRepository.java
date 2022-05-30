@@ -1,4 +1,4 @@
-package com.example.security.repository;
+package com.example.security.model;
 
 import com.example.security.model.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;

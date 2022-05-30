@@ -1,8 +1,8 @@
 package com.example.security.controller;
 
-import com.example.security.model.Token;
+import com.example.security.dto.Token;
 import com.example.security.model.User;
-import com.example.security.repository.UserRepository;
+import com.example.security.model.UserRepository;
 import com.example.security.security.JwtTokenProvider;
 import com.example.security.service.JwtService;
 import com.example.security.service.UserService;
