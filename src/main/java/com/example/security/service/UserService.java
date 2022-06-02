@@ -1,7 +1,6 @@
 package com.example.security.service;
 
-import com.example.security.model.User;
-import com.example.security.repository.UserRepository;
+import com.example.security.model.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;

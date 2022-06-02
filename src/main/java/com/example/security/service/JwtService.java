@@ -2,7 +2,7 @@ package com.example.security.service;
 
 import com.example.security.model.RefreshToken;
 import com.example.security.dto.TokenDto;
-import com.example.security.repository.RefreshTokenRepository;
+import com.example.security.model.RefreshTokenRepository;
 import com.example.security.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

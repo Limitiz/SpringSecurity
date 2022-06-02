@@ -1,5 +1,15 @@
 package com.example.security.model;
 
-public enum Role {
-    ROLE_USER, ROLE_ADMIN
+import lombok.Getter;
+
+@Getter
+public enum Role{
+    USER("ROLE_USER"),
+    ADMIN("ROLE_ADMIN");
+
+    private String role;
+
+    Role(String role) {
+        this.role = role;
+    }
 }
