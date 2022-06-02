@@ -1,7 +1,7 @@
 package com.example.security.service;
 
 import com.example.security.model.RefreshToken;
-import com.example.security.model.Token;
+import com.example.security.dto.TokenDto;
 import com.example.security.repository.RefreshTokenRepository;
 import com.example.security.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class JwtService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
-    public void login(Token tokenDto){
+    public void login(TokenDto tokenDto){
 
         RefreshToken refreshToken = RefreshToken.builder().keyId(tokenDto.getKey()).refreshToken(tokenDto.getRefreshToken()).build();
         String userId = refreshToken.getKeyId();

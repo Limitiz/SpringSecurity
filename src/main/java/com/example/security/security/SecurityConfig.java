@@ -12,12 +12,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.filter.CorsFilter;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CorsFilter corsFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public PasswordEncoder passwordEncoder() {  // 암호화에 필요한 PasswordEncoder를 Bean으로 등록
@@ -31,8 +34,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception{
-        web.ignoring().antMatchers("/h2-console/**");
+    public void configure(WebSecurity web) {
+        web.ignoring().antMatchers(
+                "/h2-console/**"
+                , "/favicon.ico"
+                , "/error"
+        );
     }
 
     @Override
@@ -41,6 +48,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.httpBasic().disable()  // rest api 고려해서 기본 설정은 해제
                 .csrf().ignoringAntMatchers("/h2-console/**").disable()  // csrf 보안 토큰 해제 처리
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 토큰 기반 인증이기에 세션 사용하지 않음 설정
+
+                .and()
+                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+
                 .and()
                 .authorizeRequests()  // 요청에 대한 사용권한 체크
                 .antMatchers("/h2-console/**").permitAll()
@@ -48,6 +61,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/user/**").hasRole("USER")
                 .antMatchers("/**").permitAll()  // 그외 나머지 경로 요청은 누구나 접근 가능함
+
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
     }

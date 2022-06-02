@@ -1,18 +1,25 @@
 package com.example.security.controller;
 
-import com.example.security.model.Token;
+import com.example.security.dto.LoginDto;
+import com.example.security.dto.TokenDto;
+import com.example.security.model.Role;
 import com.example.security.model.User;
 import com.example.security.repository.UserRepository;
 import com.example.security.security.JwtTokenProvider;
 import com.example.security.service.JwtService;
 import com.example.security.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 import static com.example.security.model.Role.ROLE_USER;
@@ -26,7 +33,6 @@ public class UserController {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final JwtService jwtService;
-    private final UserService userService;
 
     // 회원 가입 (테스트용)
     @PostMapping("/join")
@@ -35,7 +41,7 @@ public class UserController {
                         .userId(user.get("user_id"))
                         .password(passwordEncoder.encode(user.get("password")))
                         .name(user.get("name"))
-                        .role(ROLE_USER) // 최초 가입시 USER 로 설정
+                        .role(Role.valueOf(user.get("role"))) // 최초 가입시 USER 로 설정
                         .build());
 
         return newUser.toString();
@@ -43,18 +49,25 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public Token login(@RequestBody Map<String, String> user) {
-        log.info("user id = {}", user.get("id"));
-        User member = userRepository.findByUserId(user.get("user_id"))
+    public ResponseEntity<?> login(@RequestBody LoginDto loginDto, HttpServletResponse response) throws JsonProcessingException {
+        User user = userRepository.findByUserId(loginDto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사번 입니다."));
-        if (!passwordEncoder.matches(user.get("password"), member.getPassword())) {
+        if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("잘못된 비밀번호입니다.");
         }
-
-        Token tokenDto = jwtTokenProvider.createAccessToken(member.getUsername(), member.getRole());
+        TokenDto tokenDto = jwtTokenProvider.createAccessToken(user.getUsername(), user.getRole());
         jwtService.login(tokenDto);
 
-        return tokenDto;
+        Cookie cookie = new Cookie("refresh_token", tokenDto.getRefreshToken());
+        //아마 프론트단의 주소겠지..?
+        //cookie.setDomain("localhost:8080");
+        cookie.setPath("/login");
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+
+        response.addCookie(cookie);
+
+        return new ResponseEntity<>(tokenDto.getAccessToken(), HttpStatus.OK);
     }
 
     //Token test

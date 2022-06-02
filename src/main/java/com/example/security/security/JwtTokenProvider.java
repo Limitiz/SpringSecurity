@@ -8,8 +8,9 @@ import javax.servlet.http.HttpServletRequest;  ///  pom.xml에 라이브러리 �
 
 import com.example.security.model.RefreshToken;
 import com.example.security.model.Role;
-import com.example.security.model.Token;
+import com.example.security.dto.TokenDto;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,6 +38,7 @@ public class JwtTokenProvider {
     @Value("${jwt.token.validation.refresh}")
     private long refreshTokenValidTime;
 
+    @Autowired
     private UserDetailsService  userDetailsService;
 
     //객체 초기화 (secretKey encoding)
@@ -48,10 +50,10 @@ public class JwtTokenProvider {
     }
 
     // JWT token create
-    public Token createAccessToken(String userId, Role role) {
+    public TokenDto createAccessToken(String userId, Role role) {
 
         Claims claims = Jwts.claims().setSubject(userId); // JWT payload에 저장되는 정보 단위
-        claims.put("roles", role);  //
+        claims.put("role", role);  //
         Date now = new Date();
 
         String accessToken =  Jwts.builder()
@@ -69,7 +71,7 @@ public class JwtTokenProvider {
                 .signWith(secretKey) // 암호화 알고리즘 + secretKey = signature
                 .compact();
 
-        return Token.builder().accessToken(accessToken).refreshToken(refreshToken).key(userId).build();
+        return TokenDto.builder().accessToken(accessToken).refreshToken(refreshToken).key(userId).build();
     }
 
     public boolean validateToken(String jwtToken){
@@ -91,7 +93,7 @@ public class JwtTokenProvider {
 
             //만료시간이 지나지 않았을 경우 access token 다시 발급
              if(!claims.getBody().getExpiration().before(new Date()))
-                 return recreationAccessToken(claims.getBody().get("sub").toString(), claims.getBody().get("roles"));
+                 return recreationAccessToken(claims.getBody().get("sub").toString(), claims.getBody().get("role"));
         }catch (Exception e){
             //만료되었을 경우 로그인 필요
             return null;
@@ -102,7 +104,7 @@ public class JwtTokenProvider {
     //access token 다시 발급
     public String recreationAccessToken(String userId, Object role){
         Claims claims = Jwts.claims().setSubject(userId);
-        claims.put("roles", role);
+        claims.put("role", role);
         Date now = new Date();
 
         String accessToken = Jwts.builder().setClaims(claims)
@@ -118,7 +120,7 @@ public class JwtTokenProvider {
     // JWT token에서 인증 정보 조회
     public Authentication getAuthentication(String token) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(token));
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
     }
 
     // token에서 회원 정보 추출

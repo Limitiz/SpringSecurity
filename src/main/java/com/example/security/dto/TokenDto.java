@@ -1,4 +1,4 @@
-package com.example.security.model;
+package com.example.security.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Token {
+public class TokenDto {
     private String grantType;
     private String accessToken;
     private String refreshToken;

@@ -19,18 +19,18 @@ public class RefreshController {
     private final JwtService jwtService;
 
     @PostMapping("/refresh")
-    public HttpStatus validateRefreshToken(@RequestBody HashMap<String, String> bodyJson){
+    public String validateRefreshToken(@RequestBody HashMap<String, String> bodyJson){
 
         log.info("refresh controller 실행");
-        Map<String, String> map = jwtService.validateRefreshToken(bodyJson.get("refreshToken"));
+        Map<String, String> map = jwtService.validateRefreshToken(bodyJson.get("refresh_token"));
 
         if(map.get("status").equals("402")){
             log.info("RefreshController - Refresh Token이 만료.");
-            return HttpStatus.UNAUTHORIZED;
+            return map.get("status");
         }
 
         log.info("RefreshController - Refresh Token이 유효.");
-        return HttpStatus.OK;
+        return map.get("accessToken");
 
     }
 }
