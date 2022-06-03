@@ -1,13 +1,18 @@
 package com.example.security.controller;
 
+import com.example.security.model.Code;
 import com.example.security.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,18 +24,18 @@ public class RefreshController {
     private final JwtService jwtService;
 
     @PostMapping("/refresh")
-    public String validateRefreshToken(@RequestBody HashMap<String, String> bodyJson){
+    public ResponseEntity validateRefreshToken(@RequestBody Map<String, String> body, HttpServletResponse response) throws IOException {
 
         log.info("refresh controller 실행");
-        Map<String, String> map = jwtService.validateRefreshToken(bodyJson.get("refresh_token"));
+        String accessToken = jwtService.validateRefreshToken(body.get("refresh_token"));
 
-        if(map.get("status").equals("402")){
-            log.info("RefreshController - Refresh Token이 만료.");
-            return map.get("status");
+        if(accessToken == null){
+            response.sendError(Code.EXPIRED_TOKEN.getCode(), Code.EXPIRED_TOKEN.getMessage());
+            return null;
         }
 
         log.info("RefreshController - Refresh Token이 유효.");
-        return map.get("accessToken");
+        return new ResponseEntity(accessToken, HttpStatus.OK);
 
     }
 }
