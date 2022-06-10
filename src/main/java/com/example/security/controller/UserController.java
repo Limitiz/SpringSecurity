@@ -10,6 +10,8 @@ import com.example.security.service.JwtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @Slf4j
+@PropertySource("classpath:application.yml")
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -31,6 +34,9 @@ public class UserController {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
+    /*@Value("${jwt.token.validation.refresh}")
+    private final int cookieAge;*/
+
     // 회원 가입 (테스트용)
     @PostMapping("/join")
     public String join(@RequestBody Map<String, String> user) {
@@ -38,7 +44,7 @@ public class UserController {
                         .userId(user.get("user_id"))
                         .password(passwordEncoder.encode(user.get("password")))
                         .name(user.get("name"))
-                        .role(Role.valueOf(user.get("role"))) // 최초 가입시 USER 로 설정
+                        .role(Role.valueOf(user.get("role")))
                         .build());
 
         return newUser.toString();
@@ -69,8 +75,24 @@ public class UserController {
     //Token test
     @RestController
     public class TestController {
-
         @PostMapping("/test")
+        public HttpStatus test(){
+            return HttpStatus.OK;
+        }
+    }
+
+    //Role Test
+    @RestController
+    public class AdminTestController {
+        @PostMapping("/admin/test")
+        public HttpStatus test(){
+            return HttpStatus.OK;
+        }
+    }
+
+    @RestController
+    public class UserTestController {
+        @PostMapping("/user/test")
         public HttpStatus test(){
             return HttpStatus.OK;
         }

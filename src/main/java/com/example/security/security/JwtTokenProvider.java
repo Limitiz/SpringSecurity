@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 @PropertySource("classpath:application.yml")
 @RequiredArgsConstructor   // 필수 멤버변수만 갖는 생성자함수
 @Component
-public class JwtTokenProvider {
+public class JwtTokenProvider implements TokenProvider{
 
     private SecretKey secretKey;
 
@@ -50,6 +50,7 @@ public class JwtTokenProvider {
     }
 
     // JWT token create
+    @Override
     public TokenDto createAccessToken(String userId, Role role) {
 
         Claims claims = Jwts.claims().setSubject(userId); // JWT payload에 저장되는 정보 단위
@@ -74,6 +75,7 @@ public class JwtTokenProvider {
         return TokenDto.builder().accessToken(accessToken).refreshToken(refreshToken).key(userId).build();
     }
 
+    @Override
     public boolean validateToken(String jwtToken){
         try {
             Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwtToken);
@@ -84,6 +86,7 @@ public class JwtTokenProvider {
     }
 
     // token 유효성 , 만료일자 확인
+    @Override
     public String validateRefreshToken(RefreshToken token){
         String refreshToken = token.getRefreshToken();
 
@@ -102,6 +105,7 @@ public class JwtTokenProvider {
     }
 
     //access token 다시 발급
+    @Override
     public String recreationAccessToken(String userId, Object role){
         Claims claims = Jwts.claims().setSubject(userId);
         claims.put("role", role);
@@ -118,17 +122,20 @@ public class JwtTokenProvider {
     }
 
     // JWT token에서 인증 정보 조회
+    @Override
     public Authentication getAuthentication(String token) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(token));
         return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
     }
 
     // token에서 회원 정보 추출
+    @Override
     public String getUserId(String token) {
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
     }
 
     // Request의 Header에서 token 값 가져오기    "Authorization" : "token value"
+    @Override
     public String resolveToken(HttpServletRequest request) {  // HttpServletRequest 라이브러리 추가할것
         return request.getHeader("Authorization");
     }
