@@ -56,8 +56,7 @@ public class UserController {
         jwtService.login(tokenDto);
 
         Cookie cookie = new Cookie("refresh_token", tokenDto.getRefreshToken());
-        //아마 프론트단의 주소겠지..?
-        //cookie.setDomain("localhost:8080");
+        cookie.setDomain("localhost:3000");
         cookie.setPath("/login");
         cookie.setSecure(true);
         cookie.setHttpOnly(true);
